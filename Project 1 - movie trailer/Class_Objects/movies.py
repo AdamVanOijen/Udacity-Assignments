@@ -1,4 +1,4 @@
-"""defining a class with name 'Movie'- defines the contents of the objects in the instance of this class."""
+"""This module defines a class with name 'Movie'"""
 class Movie ():
 	"""Instances of this class contain information on a given movie"""
 
