@@ -1,1 +1,0 @@
-To run the program on linux, first run 'psql -f tournament.sql', and then run 'python tournament_test.py'
