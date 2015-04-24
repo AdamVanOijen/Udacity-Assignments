@@ -6,11 +6,20 @@
 -- You can write comments in this file by starting them with two dashes, like
 -- these lines here.
 
+drop database if exists tournament;
+create database tournament;
+\c tournament;
 
 --players table contains general information on each player
-create table players ( name text, player_ID serial primary key );
+create table players(   name text, 
+                        player_ID serial primary key );
 --matches table contains information about a match between two players
-create table matches ( player1 serial references players, player2 serial references players, player1_result text, player2_result text, match_ID serial, primary key(match_id ) );
+create table matches ( player1 serial references players, 
+                       player2 serial references players, 
+                       player1_result text, 
+                       player2_result text, 
+                       match_ID serial, 
+                       primary key(match_id ) );
 
 
 

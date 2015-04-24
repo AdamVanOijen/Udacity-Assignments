@@ -1,4 +1,4 @@
-To run the program on Linux, first SSH in to the virtual machine, and change to the directory containing tournament.sql. From the corresponding directory, run 'psql -d tournament -f tournament.sql' to run the code that creates the database. After creating the database, run 'python tournament_test.py' from the same directory to run the python application.
+To run the program on Linux, first SSH in to the virtual machine, and change to the directory containing tournament.sql. From the corresponding directory, run 'psql -f tournament.sql' to run the code that creates the database. After creating the database, run 'python tournament_test.py' from the same directory to run the python application.
 
 The arguments of reportMatch in tournament_test.py have been modified to accomodate to the extra credit task. "Support games where a draw (tied game) is possible. This will require changing the arguments to reportMatch." Also, I accidently deleted code in testPairings that checks to see if the pairs are correct. My application did pass 'testPairings' before I deleted that code though.
 
