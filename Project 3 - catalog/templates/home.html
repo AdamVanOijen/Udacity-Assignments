@@ -1,0 +1,78 @@
+<html>
+	<head>
+		<link href ='static/home.css', rel = 'stylesheet', type='text/css'>
+	</head>
+
+	<body>
+		<div id = 'top_bar'>
+			<h1> Catalog App </h1>
+			<span class = "welcome">welcome {{login_session['username']}}</span>
+			<img src ={{login_session['picture']}}>
+			<a id = "login" href = {{url_for('login')}}> Login </a>
+		</div>
+		<div id = "main">
+			<div class = "sections">
+				<h2> Latest Items </h2>
+				<ul>
+					{% for index in newItems:%}
+						<li> <a href= "/categories/id/{{index.categories_id}}" > {{index.name}} </a> </li>
+					{%endfor%}
+				</ul>
+			</div>
+
+			<div class = "sections">
+				<h2> Categories </h2>
+				<ul>
+					{% for index in categories %}
+						<li class = "category_name">
+						<a href="{{url_for('category', id = index.id)}}" > {{index.name}} </a>
+						<span class = "edit_catalog" categoryID = "{{index.id}}" 
+							userID = "{{index.userID}}"></span>
+						</li>
+					{% endfor %}
+				</ul>
+				<span id="add_category"></span>
+			</div>
+
+		</div>
+		<script>
+			ID ={% if login_session['user_id']:%}
+					{{login_session['user_id']}};
+				{%endif%}
+				{% if not login_session['user_id']%}
+					{{0}};
+				{%endif%}
+			function editCatalog(){
+				///displays a link to the 'edit category' page if the user is logged in.
+				var div = document.getElementsByClassName("edit_catalog");
+				var length = div.length;
+				
+				for (var i = 0; i <= length; i++){
+					if (div[i].getAttribute('userID') == ID){
+						var edit = document.createElement("a");
+						var categoryID =div[i].getAttribute('categoryID');
+						edit.href= "/categories/id/" + categoryID + "/edit";
+						var text = document.createTextNode("edit catalog");
+						edit.appendChild(text);
+						div[i].appendChild(edit);
+					}
+				}
+			}
+
+			function addCategory(){
+				///displays a link to the 'add cetegory page if the user is logged in.'
+				var button = document.getElementById("add_category");
+				var link = document.createElement("a");
+				link.href = "{{url_for('addCategory')}}";
+				var text = document.createTextNode("add category");
+				link.appendChild(text);
+				button.appendChild(link);
+			}
+
+			if (ID != 0){
+				addCategory();
+				editCatalog();
+			}
+		</script>
+	</body>
+</html>

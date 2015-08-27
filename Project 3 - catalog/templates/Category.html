@@ -1,0 +1,12 @@
+<html>
+	<body>
+		<h1>{{categoryName}}</h1>
+
+		{%for index in items%}
+			
+			<h2>{{index.name}}</h2>
+			{{index.description}}
+			<br>
+		{%endfor%}
+	</body>
+</html>

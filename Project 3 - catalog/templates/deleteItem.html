@@ -1,0 +1,8 @@
+<html>
+	<body>
+		<h1>Are you sure you want to delete {{ItemToDelete.name}}?</h1>
+		<form method = 'POST' action = {{url_for('deleteItem', id=ItemToDelete.id)}}>
+			<input type = "submit" value = "delete">
+		</form>
+	</body>
+</html>
