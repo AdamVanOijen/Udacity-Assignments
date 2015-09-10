@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, redirect, request, flash, make_response, jsonify
+from flask import Flask, render_template, url_for, redirect, request, flash, make_response, jsonify, g
 from flask import session as login_session
 
 from sqlalchemy import create_engine, desc
@@ -6,9 +6,10 @@ from sqlalchemy.sql.expression import func
 from sqlalchemy.orm import sessionmaker
 
 from dbsetup import Categories, Items, Users
+from DBHelpers import getUserID, createUser
 
 from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
-
+from functools import wraps
 import random, string
 import json
 import httplib2
@@ -24,25 +25,19 @@ session = DBsession()
 CLIENT_ID = json.loads(
 	open('client_secrets.json', 'r').read())['web']['client_id']
 
-def getUserID(email):
-	"""Checks if user's details are in the databse. If True, the user ID is returned;
-	if not, nothing is returned"""
-	try:
-		user = session.query(Users).filter_by(email = email).one()
-		return user.id
-	except:
-		return None
-
-def createUser(login_session):
-	"""takes the users google plus information from login_session, stores it in the database,
-	and returns the users id from the databse"""
-	newUser = Users(name = login_session['username'], email = login_session['email'], 
-		picture = login_session['picture'])
-	session.add(newUser)
-	session.commit()
-	user = session.query(Users).filter_by(email = login_session['email']).one()
-	print user.id
-	return user.id
+def login_required(f):
+	@wraps(f)#copies arguments list, name, docstring from f to wrapper
+	def wrapper(*args, **kwargs):
+		try:
+			login_session['username']
+			if len(kwargs) == 1:
+				categoriesUserID = session.query(Categories.userID).filter_by(id = kwargs['id']).one()
+				if login_session['user_id'] != categoriesUserID[0]:
+					return "you are not authorized to view this page; you must be the creator of the category to make changes"
+		except:
+			return "you must signed in to view this page"
+		return f(*args, **kwargs)
+	return wrapper
 
 @app.route('/')
 def home():
@@ -64,14 +59,12 @@ def login():
 	return render_template('login.html', STATE = state)
 
 @app.route('/categories/id/<int:id>/edit', methods = ['GET', 'POST'])
+@login_required
 def editCategory(id):
 	"""returns the page for editing a category. Only users who created the category can edit it,
 	this is ensured by checking that the user ID in the login_session object mathces the user ID
 	stored with the category in the databse. Items of the category are created, deleted and edited 
 	with forms."""
-	app.add_url_rule
-	items = session.query(Items).filter_by(categories_id = id).all()
-	userID = session.query(Categories.userID).filter_by(id = id).one()
 	if request.method == 'POST':
 		if request.args.get('itemid'):
 			itemID = request.args.get('itemid')
@@ -96,11 +89,9 @@ def editCategory(id):
 			return redirect(url_for('home'))
 
 	if request.method =='GET':
-		#prevents people from being able to edit the catalog if they are not signed in.
-		if login_session['user_id'] == userID[0]:
-			return render_template('editCategory.html', items = items, cat_id = id)
-		else:
-			return "you do not have authorization to make changes to this category"
+		items = session.query(Items).filter_by(categories_id = id).all()
+		return render_template('editCategory.html', items = items, cat_id = id)
+
 
 @app.route('/categories/id/<int:id>')
 def category(id):
@@ -111,24 +102,34 @@ def category(id):
 	return render_template("Category.html", items = items, categoryName = categoryName[0])
 
 @app.route('/categories/new', methods = ['GET', 'POST'])
+@login_required
 def addCategory():
 	"""returns a page for the user to create a new category if they are signed in. This is 
 	ensured by checking that there is a user_id in the user's login_session"""
-	try:
-		login_session['user_id']
-		if request.method == 'GET':
-			return render_template('addCategory.html')
+	login_session['user_id']
+	if request.method == 'GET':
+		return render_template('addCategory.html')
 
-		if request.method == 'POST':
-			categoryName = request.form['name']
-			newCategory = Categories(name = categoryName, userID = login_session['user_id'])
-			session.add(newCategory)
-			session.commit()
-			return redirect(url_for('home'))
-	except:
-		return "must be signed in to add a new category"
+	if request.method == 'POST':
+		categoryName = request.form['name']
+		newCategory = Categories(name = categoryName, userID = login_session['user_id'])
+		session.add(newCategory)
+		session.commit()
+		return redirect(url_for('home'))
+
+@app.route('/categories/id/<int:id>/delete', methods = ['GET', 'POST'])
+@login_required
+def deleteCategory(id):
+	if request.method == 'POST':
+		CategoryToDelete = session.query(Categories).filter_by(id = id).one()
+		session.delete(CategoryToDelete)
+		session.commit()
+		return redirect(url_for('home'))
+	if request.method == 'GET':
+		return render_template('deleteCategory.html', id = id)
 
 @app.route('/item/id/<int:id>/delete', methods = ['GET','POST'])
+@login_required
 def deleteItem(id):
 	"""Returns a page for the user to confirm that they want to delete the chosen item ."""
 	ItemToDelete = session.query(Items).filter_by(id = id).one()

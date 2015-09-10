@@ -26,9 +26,14 @@
 					{% for index in categories %}
 						<li class = "category_name">
 						<a href="{{url_for('category', id = index.id)}}" > {{index.name}} </a>
+
 						<span class = "edit_catalog" categoryID = "{{index.id}}" 
 							userID = "{{index.userID}}"></span>
+
+						<span class = "delete_catalog" categoryID = "{{index.id}}"
+							userID="index.userID"></span>
 						</li>
+
 					{% endfor %}
 				</ul>
 				<span id="add_category"></span>
@@ -43,7 +48,8 @@
 					{{0}};
 				{%endif%}
 			function editCatalog(){
-				///displays a link to the 'edit category' page if the user is logged in.
+				///displays a link to the 'edit category' page if the user is logged in and they are the
+				//owner of the category.
 				var div = document.getElementsByClassName("edit_catalog");
 				var length = div.length;
 				
