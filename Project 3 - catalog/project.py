@@ -26,6 +26,9 @@ CLIENT_ID = json.loads(
 	open('client_secrets.json', 'r').read())['web']['client_id']
 
 def login_required(f):
+	""" function wrapper that checks if the current user is logged in, and if the decorated function takes 
+	a 'Categories' 'id' as an argument, the decorator will check if the user's login_Session['user_id'] matches 
+	the 'Categories' 'UserID' Column"""
 	@wraps(f)#copies arguments list, name, docstring from f to wrapper
 	def wrapper(*args, **kwargs):
 		try:
