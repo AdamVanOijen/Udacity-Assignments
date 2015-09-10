@@ -1,4 +1,4 @@
-To run this application, change directory in to 'categories', and run python project.py.
+To run this application, change directory in to 'catalog', and run python project.py.
 
 Using The Application...
 
