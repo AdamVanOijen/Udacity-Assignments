@@ -16,3 +16,6 @@ The user can then continue to click on 'edit category' next to their newly creat
 
 To delete a category click 'delete category' at the bottom of '/categories/id/<int:id>/edit' page -- clicking it will redirect the user to a confirmation page
 at /categories/id/<int:id>/delete.
+
+note: i added some categories / items of my own (under my own google+ signin) to the database 
+to demonstrate that the user can only edit their own categories.
