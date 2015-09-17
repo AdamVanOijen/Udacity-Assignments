@@ -24,6 +24,4 @@ def createUser(login_session):
 		picture = login_session['picture'])
 	session.add(newUser)
 	session.commit()
-	user = session.query(Users).filter_by(email = login_session['email']).one()
-	print user.id
-	return user.id
+	return newUser.id

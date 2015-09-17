@@ -10,7 +10,7 @@ class Users(Base):
 	name = Column(String, nullable =False)
 	email = Column(String, nullable = False)
 	picture = Column(String, nullable = True)
-
+	categories = relationship("Categories")
 	@property
 	def serialize(self):
 		return {
@@ -25,7 +25,7 @@ class Categories(Base):
 	id = Column(Integer, primary_key = True)
 	name = Column(String, nullable = False)
 	userID = Column(Integer, ForeignKey('users.id'))
-	users = relationship(Users)
+	items = relationship("Items", cascade = "delete, delete-orphan", single_parent=True)
 
 	@property
 	def serialize(self):
@@ -44,7 +44,6 @@ class Items(Base):
 	description = Column(String, nullable = False)
 	time = Column(DateTime)
 	categories_id = Column(Integer, ForeignKey('categories.id'))
-	categories = relationship(Categories)
 
 	@property
 	def serialize(self):

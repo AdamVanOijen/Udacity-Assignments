@@ -26,14 +26,11 @@ CLIENT_ID = json.loads(
 	open('client_secrets.json', 'r').read())['web']['client_id']
 
 def login_required(f):
-	""" function wrapper that checks if the current user is logged in, and if the decorated function takes 
-	a 'Categories' 'id' as an argument, the decorator will check if the user's login_Session['user_id'] matches 
-	the 'Categories' 'UserID' Column"""
 	@wraps(f)#copies arguments list, name, docstring from f to wrapper
 	def wrapper(*args, **kwargs):
 		try:
 			login_session['username']
-			if len(kwargs) == 1:
+			if len(kwargs) > 0:
 				categoriesUserID = session.query(Categories.userID).filter_by(id = kwargs['id']).one()
 				if login_session['user_id'] != categoriesUserID[0]:
 					return "you are not authorized to view this page; you must be the creator of the category to make changes"
@@ -72,19 +69,22 @@ def editCategory(id):
 		if request.args.get('itemid'):
 			itemID = request.args.get('itemid')
 			ItemToEdit = session.query(Items).filter_by(id = itemID).one()
-			if request.form['name'] != '':
-				name = request.form['name']
-				ItemToEdit.name=name
-				session.add(ItemToEdit)
-				session.commit()
+			if ItemToEdit.categories_id == id:
+				if request.form['name'] != '':
+					name = request.form['name']
+					ItemToEdit.name=name
+					session.add(ItemToEdit)
+					session.commit()
 			
-			if request.form['description']!= '':
-				description = request.form['description']
-				ItemToEdit.description=description
-				session.add(ItemToEdit)
-				session.commit()
+				if request.form['description']!= '':
+					description = request.form['description']
+					ItemToEdit.description=description
+					session.add(ItemToEdit)
+					session.commit()
 
-			return redirect(url_for('home'))
+				return redirect(url_for('home'))
+			else:
+				return "the itemID specified, does not correspond to the category specified."
 		else: 
 			newItem = Items(name = request.form['name'], description = request.form['description'], categories_id= id)
 			session.add(newItem)
@@ -131,17 +131,17 @@ def deleteCategory(id):
 	if request.method == 'GET':
 		return render_template('deleteCategory.html', id = id)
 
-@app.route('/item/id/<int:id>/delete', methods = ['GET','POST'])
+@app.route('/categories/id/<int:id>/item/id/<int:Itemid>/delete', methods = ['GET','POST'])
 @login_required
-def deleteItem(id):
+def deleteItem(id, Itemid):
 	"""Returns a page for the user to confirm that they want to delete the chosen item ."""
-	ItemToDelete = session.query(Items).filter_by(id = id).one()
+	ItemToDelete = session.query(Items).filter_by(id = Itemid).one()
 	if request.method == 'POST':
 		session.delete(ItemToDelete)
 		session.commit()
 		return redirect(url_for('home'))
 	else:
-		return render_template('deleteItem.html', ItemToDelete = ItemToDelete)
+		return render_template('deleteItem.html', ItemToDelete = ItemToDelete, id = id)
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
